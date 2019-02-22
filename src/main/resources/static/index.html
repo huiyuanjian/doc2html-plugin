@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Word转HTML代码处理工具</title>
+    <script src="js/jquery-3.3.1.min.js" type="text/javascript"></script>
+    <script src="js/wangEditor/wangEditor.min.js" type="text/javascript"></script>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <style type="text/css">
+
+        /*定义滚动条轨道*/
+        ::-webkit-scrollbar-track {
+            background-color: #ccc;
+            -webkit-box-shadow: inset 0 0 6px #ccc;
+        }
+
+        /*定义滚动条高宽高及背景*/
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 10px;
+            background-color: #ccc;
+        }
+
+        /*定义滚动条*/
+        ::-webkit-scrollbar-thumb {
+            background-color: #888;
+        }
+
+        /*
+        预览框样式
+         */
+        #preview {
+            width: 100%;
+            border: 1px solid #ccc;
+            padding: 10px 30px;
+            overflow: auto;
+            margin-bottom: 30px;
+        }
+
+        /*
+        代码框样式
+         */
+        #code {
+            outline: none;
+            resize: none;
+            width: 100%;
+            height: 300px;
+            border: 1px solid #ccc;
+            padding: 10px 30px;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Word转HTML代码处理工具（该程序只能在本地运行）</h1>
+    <p>请将Word文档中的内容粘贴到下面的输入框中</p>
+    <div id="editor"></div>
+
+    <br>
+
+    <p>请在下面输入你要替换文章中的内容（格式为 原词=替换词 多个之间使用英文","隔开）</p>
+    <input class="form-control" id="replace" type="text" value="重阳=CY">
+
+    <br>
+
+    <button class="btn btn-primary col-5 preview" value="view">预览</button>
+    <button class="btn btn-primary col-5 preview float-right" value="code">代码</button>
+
+    <br><br>
+
+    <div id="preview" style="display: none;"></div>
+
+    <label for="code"></label>
+    <textarea id="code" style="display: none;"></textarea>
+
+</div>
+
+
+<script type="text/javascript">
+    // 创建富文本编辑器
+    var E = window.wangEditor;
+    var editor = new E('#editor');
+    editor.customConfig.uploadImgShowBase64 = true;
+    editor.create();
+    // 按钮点击事件
+    $(".preview").click(function () {
+        // 用户的操作
+        var operation = $(this).val();
+        // 输入框中的代码
+        var code = editor.txt.html();
+        // 关键字
+        var keywords = $("#replace").val();
+        // 预览框
+        var previewElement = $("#preview");
+        // 代码框
+        var codeElement = $("#code");
+        // 后台处理请求
+        $.post(
+            "/doc2Html",
+            {"code": code, "keywords": keywords},
+            function (result) {
+                if (result.success) {
+                    if (operation === "view") {
+                        codeElement.hide();
+                        previewElement.show();
+                        previewElement.html(result.html);
+                    } else {
+                        previewElement.hide();
+                        codeElement.show();
+                        codeElement.text(result.html);
+                    }
+                } else {
+                    alert(result.message);
+                }
+            },
+            "json"
+        )
+    });
+</script>
+</body>
+</html>
