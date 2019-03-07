@@ -47,5 +47,16 @@
         </dependency>
     </dependencies>
 
+    <!--添加打包插件-->
+    <build>
+        <finalName>doc2html-plugin</finalName>
+        <plugins>
+            <!--可以使用Maven命令spring-boot:run来启动SpringBoot-->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
