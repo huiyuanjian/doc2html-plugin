@@ -62,6 +62,7 @@
     <br>
 
     <p>请在下面输入你要替换文章中的内容（格式为 原词=替换词 多个之间使用英文","隔开）</p>
+    <label for="replace"></label>
     <input class="form-control" id="replace" type="text" value="重阳=CY">
 
     <br>
@@ -80,18 +81,24 @@
 
 
 <script type="text/javascript">
-    // 创建富文本编辑器
+    /*
+        创建富文本编辑器
+    */
     var E = window.wangEditor;
     var editor = new E('#editor');
     editor.customConfig.uploadImgShowBase64 = true;
     editor.create();
-    // 按钮点击事件
+    /*
+        点击提交内容到后台进行处理
+    */
     $(".preview").click(function () {
-        // 用户的操作
+        // 提高图片的清晰度
+        improvePictureQuality($("#editor"));
+        // 用户的操作（预览还是代码）
         var operation = $(this).val();
-        // 输入框中的代码
+        // 输入框中的代码（……）
         var code = editor.txt.html();
-        // 关键字
+        // 关键字（关键字用来替换文章中的内容）
         var keywords = $("#replace").val();
         // 预览框
         var previewElement = $("#preview");
@@ -104,21 +111,45 @@
             function (result) {
                 if (result.success) {
                     if (operation === "view") {
-                        codeElement.hide();
-                        previewElement.show();
-                        previewElement.html(result.html);
+                        codeElement.hide(); // 代码框隐藏
+                        previewElement.show(); // 预览框显示
+                        previewElement.html(result.message);
                     } else {
-                        previewElement.hide();
-                        codeElement.show();
-                        codeElement.text(result.html);
+                        previewElement.hide(); // 预览框显示
+                        codeElement.show(); // 代码框隐藏
+                        codeElement.text(result.message);
                     }
                 } else {
-                    alert(result.message);
+                    alert(result.message); // 错误提示
                 }
             },
             "json"
         )
     });
+
+    /**
+     * 提高图片的清晰度【开发时间 6小时】
+     * 原理：因为对于有些图片从Word中复制后会生成两种图片清晰度
+     * 但是默认文本框中的是较低的清晰度，较高的清晰度在注释里面
+     * 提供此方法只为了把高清晰度的图片路径替换到低清晰度的图片路径中
+     * @param obj 图片所在的文本框
+     */
+    function improvePictureQuality(obj) {
+        if (typeof obj === "object") {
+            let childs = obj.contents();
+            if (childs.length === 0) return;
+            childs.filter(function () {
+                //console.dir(childs);
+                if (this.nodeType === 8 && this.data.includes("v:imagedata")) {
+                    let commentContent = this.data.replace(/\s/g, ' ');
+                    let patt = new RegExp("src=\"(.*)\" ", "g");
+                    this.nextElementSibling.src = patt.exec(commentContent)[1];
+                } else {
+                    improvePictureQuality($(this));
+                }
+            })
+        }
+    }
 </script>
 </body>
 </html>

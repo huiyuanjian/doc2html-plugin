@@ -1,6 +1,6 @@
 package com.cy.controller;
 
-import com.cy.bean.InterfaceResult;
+import com.cy.bean.Result;
 import com.cy.service.Doc2HtmlService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -26,11 +26,11 @@ public class Doc2HtmlController {
      * @return 返回页面
      */
     @RequestMapping("doc2Html")
-    public InterfaceResult doc2Html(String code, String keywords) {
+    public Result doc2Html(String code, String keywords) {
         try {
-            return new InterfaceResult(true, "处理完成", doc2HtmlService.doc2Html(code, keywords));
+            return new Result(true, doc2HtmlService.doc2Html(code, keywords));
         } catch (Exception e) {
-            return new InterfaceResult(false, e.getMessage(), null);
+            return new Result(false, e.getMessage());
         }
     }
 }

@@ -11,7 +11,7 @@ public enum ImgTagName {
     IMG("img", "支持jpeg"),
 
     /**
-     * PNG等图片
+     * 高清图片
      */
     IMAGEDATA("imagedata", "支持PNG");
 

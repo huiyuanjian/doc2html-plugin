@@ -5,18 +5,15 @@ import java.io.Serializable;
 /**
  * 返回页面的结果实体
  */
-public class InterfaceResult implements Serializable {
+public class Result implements Serializable {
 
     private boolean success;
 
     private String message;
 
-    private String html;
-
-    public InterfaceResult(boolean success, String message, String html) {
+    public Result(boolean success, String message) {
         this.success = success;
         this.message = message;
-        this.html = html;
     }
 
     public boolean isSuccess() {
@@ -33,13 +30,5 @@ public class InterfaceResult implements Serializable {
 
     public void setMessage(String message) {
         this.message = message;
-    }
-
-    public String getHtml() {
-        return html;
-    }
-
-    public void setHtml(String html) {
-        this.html = html;
     }
 }

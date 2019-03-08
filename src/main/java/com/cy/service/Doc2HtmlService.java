@@ -7,6 +7,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,7 +30,7 @@ public class Doc2HtmlService {
      */
     public String doc2Html(String code, String keywords) throws IOException {
         // 替换特殊标签，否则Jsoup解析异常
-        code = code.replaceAll("v:imagedata", "imagedata");
+        code = dealHtmlFormat(code);
         // 处理关键词
         code = dealKeyWords(code, keywords);
         // 解析HTML
@@ -51,12 +53,9 @@ public class Doc2HtmlService {
     private String dealKeyWords(String code, String keywords) {
         try {
             if (keywords != null && !"".equals(keywords)) {
-                String[] split = keywords.split(",");
-                for (String s : split) {
+                for (String s : keywords.split(",")) {
                     String[] words = s.split("=");
-                    String key = words[0];
-                    String value = words[1];
-                    code = code.replaceAll(key, value);
+                    code = code.replaceAll(words[0], words[1]);
                 }
             }
             return code;
@@ -72,19 +71,53 @@ public class Doc2HtmlService {
      * @throws IOException 如果解析失败或者文件没有找到
      */
     private void dealImg(Document document, ImgTagName imgTagName) throws IOException {
-        Elements img = document.select(imgTagName.getKey());
+        Elements img = document.select(imgTagName.getKey());// 获取页面上规定类型的图片
         for (Element element : img) {
-            String src = element.attr("src");
+            String src = element.attr("src"); // 获取图片的地址
             if (src.contains("file:///")) {
-                File file = new File(src.substring(8));
-                String mimeType = MimeUtil.mimeType(file);
-                BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(file));
-                byte[] encode = Base64.getEncoder().encode(bufferedInputStream.readAllBytes());
-                String base64 = "data:" + mimeType + ";base64," + new String(encode);
-                element.tagName("img");
-                element.attr("src", base64);
-                element.attr("style", "max-width: 100%;");
+                File file = new File(src.substring(8)); // 裁剪掉前面的file:///
+                element.tagName("img"); // 更换标签名字
+                element.attr("src", image2Base64(file)); // Base64图片
+                element.attr("style", "max-width: 100%;"); // 处理图片的大小
             }
         }
+    }
+
+    /**
+     * 将图片文件转换成Base64编码
+     *
+     * @param file 图片文件
+     * @return Base64编码后的图片
+     */
+    private String image2Base64(File file) throws IOException {
+        // 判断该文件是否是一张图片
+        if (!isImage(file)) throw new IllegalArgumentException(file + " not a picture!");
+        // 拼接图片的Base64编码
+        return "data:" + MimeUtil.mimeType(file) + ";base64," + new String(Base64.getEncoder().encode(new BufferedInputStream(new FileInputStream(file)).readAllBytes()));
+    }
+
+    /**
+     * 判断文件是否是一张图片
+     *
+     * @param file 文件
+     * @return 是否是一张图片
+     */
+    private boolean isImage(File file) {
+        try {
+            Image image = ImageIO.read(file);
+            return image != null;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    /**
+     * 处理输入框中HTML的格式
+     *
+     * @param code HTML
+     * @return 处理后的格式
+     */
+    private String dealHtmlFormat(String code) {
+        return code.replaceAll("v:imagedata", "imagedata");
     }
 }
