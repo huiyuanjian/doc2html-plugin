@@ -118,6 +118,7 @@ public class Doc2HtmlService {
      * @return 处理后的格式
      */
     private String dealHtmlFormat(String code) {
-        return code.replaceAll("v:imagedata", "imagedata");
+        return code.replaceAll("v:imagedata", "imagedata")
+                .replaceAll("text-align:justify;", "text-align:inherit;");
     }
 }

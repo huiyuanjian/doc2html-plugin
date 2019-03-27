@@ -142,8 +142,10 @@
                 //console.dir(childs);
                 if (this.nodeType === 8 && this.data.includes("v:imagedata")) {
                     let commentContent = this.data.replace(/\s/g, ' ');
-                    let patt = new RegExp("src=\"(.*)\" ", "g");
-                    this.nextElementSibling.src = patt.exec(commentContent)[1];
+                    let pattern = new RegExp("src=\"(.*)\" ", "g");
+                    let urls = pattern.exec(commentContent);
+                    if (urls == null || urls.length < 1) return;
+                    this.nextElementSibling.src = urls[1];
                 } else {
                     improvePictureQuality($(this));
                 }
