@@ -9,10 +9,7 @@ import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.Base64;
 
 /**
@@ -93,7 +90,35 @@ public class Doc2HtmlService {
         // 判断该文件是否是一张图片
         if (!isImage(file)) throw new IllegalArgumentException(file + " not a picture!");
         // 拼接图片的Base64编码
-        return "data:" + MimeUtil.mimeType(file) + ";base64," + new String(Base64.getEncoder().encode(new BufferedInputStream(new FileInputStream(file)).readAllBytes()));
+        return "data:" + MimeUtil.mimeType(file) + ";base64," + new String(Base64.getEncoder().encode(readAllBytes(new BufferedInputStream(new FileInputStream(file)))));
+    }
+
+    /**
+     * 读取所有的字节数组
+     *
+     * @param input 输入流
+     * @return 所有的字节数组
+     */
+    private static byte[] readAllBytes(final InputStream input) {
+        BufferedInputStream bufferedInput = new BufferedInputStream(input);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        try {
+            byte[] buffer = new byte[4096];
+            int length;
+            while ((length = bufferedInput.read(buffer)) != -1) {
+                output.write(buffer, 0, length);
+            }
+            return output.toByteArray();
+        } catch (IOException ignored) {
+        } finally {
+            try {
+                output.close();
+                bufferedInput.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return new byte[0];
     }
 
     /**

@@ -135,18 +135,24 @@
      * @param obj 图片所在的文本框
      */
     function improvePictureQuality(obj) {
-        if (typeof obj === "object") {
-            let childs = obj.contents();
-            if (childs.length === 0) return;
-            childs.filter(function () {
+        if (typeof obj === "object") { // 判断该变量是否是一个对象
+            let childs = obj.contents(); // 取出该元素的所有子元素
+            if (childs.length === 0) return; // 如果该元素下面已经没有子元素，返回就好了
+            childs.filter(function () { // 开始过滤子元素
                 //console.dir(childs);
+                // 如果子元素是注释类型，并且里面包含"v:imagedata"字符串，说明这个注释是提供高清图片地址的注释
                 if (this.nodeType === 8 && this.data.includes("v:imagedata")) {
+                    // 把改注释变成一行文本，比如说去掉换行符号等
                     let commentContent = this.data.replace(/\s/g, ' ');
+                    // 使用非贪婪模式取出注释中src中间的字符
                     let pattern = new RegExp("src=\"(.*)\" ", "g");
                     let urls = pattern.exec(commentContent);
                     if (urls == null || urls.length < 1) return;
+                    // 将取出来的高清src赋值给清晰度比较低的src
+                    // 因为清晰度比较低的src就在注释的下一个兄弟节点，所以使用nextElementSibling
                     this.nextElementSibling.src = urls[1];
                 } else {
+                    // 如果不是注释类型，那么就继续递归该元素下面的子元素，直到该元素下面已经没有子元素为止
                     improvePictureQuality($(this));
                 }
             })
